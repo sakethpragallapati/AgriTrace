@@ -2,94 +2,117 @@
 
 ## Project Overview
 
-`agritech` is an agricultural technology platform built on the Internet Computer (ICP) blockchain, integrating decentralized canisters with a full-stack web application. It provides user registration, login authentication, and farm produce management with a modern frontend and secure backend services.
+`agritech` is a decentralized agricultural technology platform built on the **Internet Computer (ICP)** blockchain. It integrates smart canisters with a full-stack web application to provide secure, transparent, and role-based solutions for the agricultural supply chain. The platform includes authentication, registration, and dedicated dashboards for farmers, distributors, and retailers, enabling streamlined farm produce management.
 
 ## Folder Structure
 
 ```
 agritech/
-├─ backend/                  # Backend logic
-│  ├─ env/                   # Environment configs (auth.js, canister-ids.js, ic-agent.js)
-│  ├─ server.js              # Express server
+├─ backend/                  # Backend logic (Express + ICP integration)
+│  ├─ .env                   # Environment variables
+│  ├─ auth.js                # Authentication logic (JWT, middleware)
+│  ├─ canister-ids.js        # Canister configuration
+│  ├─ ic-agent.js            # ICP agent setup
+│  ├─ server.js              # Express server entry point
 │  ├─ node_modules/          # Node.js dependencies
-│  ├─ package.json
+│  ├─ package.json           # Backend dependencies
 │  └─ package-lock.json
-├─ frontend/                 # React frontend
-│  ├─ src/
-│  │  ├─ components/         # React components (Home.jsx, Login.jsx, Register.jsx, dashboards, etc.)
-│  │  ├─ index.jsx           # Entry point
-│  │  └─ App.jsx             # Main App component
-│  ├─ public/
-│  │  └─ index.html
-│  ├─ package.json
-│  └─ package-lock.json
+├─ src/
+│  ├─ agritech/              # Motoko backend canister source
+│  │  └─ main.mo             # Core canister logic in Motoko
+│  ├─ agritech_assets/       # React frontend assets and logic
+│  │  ├─ assets/
+│  │  │  └─ main.css         # Global styles
+│  │  ├─ src/
+│  │  │  ├─ components/      # Reusable React components
+│  │  │  │  ├─ Home.jsx
+│  │  │  │  ├─ Login.jsx
+│  │  │  │  ├─ Register.jsx
+│  │  │  │  ├─ RoleSelection.jsx
+│  │  │  │  ├─ FarmerDashboard.jsx
+│  │  │  │  ├─ DistributorDashboard.jsx
+│  │  │  │  └─ RetailerDashboard.jsx
+│  │  │  ├─ index.jsx        # Frontend entry point
+│  │  │  └─ index.html       # Root HTML file
+│  └─ dist/                  # Production build output
 ├─ dfx/                      # DFX configuration for ICP canisters
 │  └─ dfx.json
 ├─ declarations/             # TypeScript or Candid declarations for ICP
-├─ webpack.config.cjs        # Webpack configuration for frontend bundling
-├─ tsconfig.json             # TypeScript config (if used in frontend)
-└─ README.md
+├─ webpack.config.cjs        # Webpack configuration
+├─ tsconfig.json             # TypeScript config
+├─ .gitignore                # Git ignore rules
+└─ README.md                 # Project documentation
 ```
 
 ## Tech Stack
 
-- **Frontend**:
-  - **React**: Component-based UI for dashboards, login, registration, and role-based pages.
-  - **Webpack**: Bundling and asset management.
-- **Backend**:
-  - **Node.js & Express**: REST API for authentication, user management, and interaction with the ICP canisters.
-  - **JWT Tokens**: Authentication and session management.
-  - **MongoDB Atlas**: Cloud-based database for storing user credentials, roles, and produce data.
-- **Blockchain / ICP**:
-  - **Internet Computer (ICP)**: Decentralized platform for hosting backend logic as canisters.
-  - **Motoko**: Smart contract language for canister development and data management.
-  - **DFX**: Local development, deployment, and management of ICP canisters.
+* **Frontend**
 
-## Installation and Setup
+  * React.js (component-based UI)
+  * Webpack (bundling & asset management)
+  * CSS (global styles in `main.css`)
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repo-url>
-   cd agritech/
-   ```
+* **Backend**
 
-2. **Backend setup**:
-   ```bash
-   cd backend/
-   npm install
-   node server.js
-   ```
+  * Node.js + Express.js (REST API & business logic)
+  * JWT (authentication & session handling)
+  * MongoDB Atlas (cloud database for users, roles, and produce)
 
-3. **Frontend setup**:
-   ```bash
-   cd frontend/
-   npm install
-   npm start
-   ```
-   Access at: `http://localhost:3000` (or configured port).
+* **Blockchain / ICP**
 
-4. **ICP canister deployment**:
-   ```bash
-   dfx start --background
-   dfx deploy
-   ```
-   Access the app canister at: `http://localhost:8000?canisterId={asset_canister_id}`
+  * Internet Computer (smart canister deployment)
+  * Motoko (smart contract development)
+  * DFX (deployment & local development tool)
 
-## Usage
+## Installation & Setup
 
-- **Registration & Login**: Users can create accounts and login using JWT authentication.
-- **Role-Based Dashboards**: Separate dashboards for Farmers, Distributors, and Retailers.
-- **Produce Management**: Add, view, and manage farm produce.
-- **ICP Integration**: Core data stored and managed via ICP canisters written in Motoko.
+### 1. Clone the repository
 
-## Contributing
+```bash
+git clone <repo-url>
+cd agritech/
+```
 
-- Clone the repository and create a branch for your feature:
-  ```bash
-  git checkout -b feature/your-feature-name
-  ```
-- Make your changes and submit a pull request.
+### 2. Backend Setup
 
-## License
+```bash
+cd backend/
+npm install
+node server.js
+```
 
-Specify your project license here, e.g., MIT License.
+Access backend at: [http://localhost:3000](http://localhost:3000)
+
+### 3. Frontend Setup
+
+```bash
+cd src/agritech_assets/
+npm install
+npm start
+```
+
+Access frontend at: [http://localhost:8080](http://localhost:8080)
+
+### 4. ICP Canister Deployment
+
+```bash
+dfx start --background
+dfx deploy
+```
+
+After deployment, you can get the `asset_canister_id` using:
+
+```bash
+dfx canister id agritech_assets
+```
+
+Access the deployed canister app at:
+`http://localhost:8000?canisterId=<asset_canister_id>`
+
+## Features
+
+* **User Authentication** – Secure registration & login with JWT.
+* **Role-Based Dashboards** – Farmers, Distributors, and Retailers each have dedicated dashboards.
+* **Produce Management** – Add, view, and manage agricultural produce.
+* **ICP Integration** – Decentralized data storage and smart contracts via Motoko canisters.
+* **Scalable Architecture** – Modular design with separation of frontend, backend, and blockchain layers.
