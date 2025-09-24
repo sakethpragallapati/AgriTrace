@@ -1,0 +1,39 @@
+type Transaction = 
+ record {
+   details: text;
+   from: opt Stakeholder;
+   timestamp: Time;
+   to: Stakeholder;
+ };
+type Time = int;
+type Stakeholder = text;
+type Result_1 = 
+ variant {
+   err: text;
+   ok: ProduceId;
+ };
+type Result = 
+ variant {
+   err: text;
+   ok: text;
+ };
+type ProduceId = nat;
+type Produce = 
+ record {
+   currentOwner: Stakeholder;
+   history: vec Transaction;
+   id: ProduceId;
+   origin: text;
+   price: nat;
+   produceType: text;
+   quality: text;
+   registeredTime: Time;
+ };
+service : {
+  addProduce: (text, text, text, nat, text) -> (Result_1);
+  getAllProduces: () -> (vec Produce) query;
+  getProduceTrace: (ProduceId) -> (opt Produce) query;
+  getProducesByOwner: (text) -> (vec Produce) query;
+  transferProduce: (ProduceId, text, text, text, nat) -> (Result);
+  verifyStakeholderInTrace: (ProduceId, text) -> (bool) query;
+}

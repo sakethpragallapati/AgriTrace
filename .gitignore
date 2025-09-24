@@ -1,0 +1,44 @@
+# Environment variables (inside backend folder)
+backend/.env
+*.env
+
+# DFX/ICP local development files (don't commit local state)
+.dfx/
+.dfx/local/
+
+# Node.js modules (both root and backend-specific)
+node_modules/
+backend/node_modules/
+
+# Package locks (regenerate on clone)
+package-lock.json
+backend/package-lock.json  # If separate lock file exists here
+
+# Build artifacts and temporary files
+dist/
+build/
+*.log
+
+# IDE/WSL temp files
+.vscode/
+*.swp
+*.swo
+
+# macOS/Linux/WSL-specific files
+.DS_Store
+*.un~
+
+# Compiled output (e.g., from Webpack or other builds)
+*.js.map
+*.d.ts
+
+# Ignore dfx-generated or local config files that shouldn't be tracked
+*.pem  # Private key files
+*.did  # Interface description files (if not needed in repo)
+
+# Optional: Ignore specific local config if not shared
+.env.local
+.env.*.local
+
+# Webpack-specific config (if not shared across environments)
+webpack.config.js  # Only if you don't want to commit this specific config

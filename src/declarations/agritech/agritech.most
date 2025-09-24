@@ -1,0 +1,21 @@
+// Version: 1.0.0
+type Produce =
+  {
+    currentOwner : Stakeholder;
+    history : [Transaction];
+    id : ProduceId;
+    origin : Text;
+    price : Nat;
+    produceType : Text;
+    quality : Text;
+    registeredTime : Time
+  };
+type ProduceId = Nat;
+type Stakeholder = Text;
+type Time = Int;
+type Transaction =
+  {details : Text; from : ?Stakeholder; timestamp : Time; to : Stakeholder};
+actor {
+  stable var nextId : Nat;
+  stable var producesEntries : [(ProduceId, Produce)]
+};
