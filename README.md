@@ -1,51 +1,95 @@
-# agritech
+# Agritech
 
-Welcome to your new agritech project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+## Project Overview
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+`agritech` is an agricultural technology platform built on the Internet Computer (ICP) blockchain, integrating decentralized canisters with a full-stack web application. It provides user registration, login authentication, and farm produce management with a modern frontend and secure backend services.
 
-To learn more before you start working with agritech, see the following documentation available online:
+## Folder Structure
 
-- [Quick Start](https://sdk.dfinity.org/docs/quickstart/quickstart-intro.html)
-- [SDK Developer Tools](https://sdk.dfinity.org/docs/developers-guide/sdk-guide.html)
-- [Motoko Programming Language Guide](https://sdk.dfinity.org/docs/language-guide/motoko.html)
-- [Motoko Language Quick Reference](https://sdk.dfinity.org/docs/language-guide/language-manual.html)
-- [JavaScript API Reference](https://erxue-5aaaa-aaaab-qaagq-cai.raw.ic0.app)
-
-If you want to start working on your project right away, you might want to try the following commands:
-
-```bash
-cd agritech/
-dfx help
-dfx config --help
+```
+agritech/
+├─ backend/                  # Backend logic
+│  ├─ env/                   # Environment configs (auth.js, canister-ids.js, ic-agent.js)
+│  ├─ server.js              # Express server
+│  ├─ node_modules/          # Node.js dependencies
+│  ├─ package.json
+│  └─ package-lock.json
+├─ frontend/                 # React frontend
+│  ├─ src/
+│  │  ├─ components/         # React components (Home.jsx, Login.jsx, Register.jsx, dashboards, etc.)
+│  │  ├─ index.jsx           # Entry point
+│  │  └─ App.jsx             # Main App component
+│  ├─ public/
+│  │  └─ index.html
+│  ├─ package.json
+│  └─ package-lock.json
+├─ dfx/                      # DFX configuration for ICP canisters
+│  └─ dfx.json
+├─ declarations/             # TypeScript or Candid declarations for ICP
+├─ webpack.config.cjs        # Webpack configuration for frontend bundling
+├─ tsconfig.json             # TypeScript config (if used in frontend)
+└─ README.md
 ```
 
-## Running the project locally
+## Tech Stack
 
-If you want to test your project locally, you can use the following commands:
+- **Frontend**:
+  - **React**: Component-based UI for dashboards, login, registration, and role-based pages.
+  - **Webpack**: Bundling and asset management.
+- **Backend**:
+  - **Node.js & Express**: REST API for authentication, user management, and interaction with the ICP canisters.
+  - **JWT Tokens**: Authentication and session management.
+  - **MongoDB Atlas**: Cloud-based database for storing user credentials, roles, and produce data.
+- **Blockchain / ICP**:
+  - **Internet Computer (ICP)**: Decentralized platform for hosting backend logic as canisters.
+  - **Motoko**: Smart contract language for canister development and data management.
+  - **DFX**: Local development, deployment, and management of ICP canisters.
 
-```bash
-# Starts the replica, running in the background
-dfx start --background
+## Installation and Setup
 
-# Deploys your canisters to the replica and generates your candid interface
-dfx deploy
-```
+1. **Clone the repository**:
+   ```bash
+   git clone <repo-url>
+   cd agritech/
+   ```
 
-Once the job completes, your application will be available at `http://localhost:8000?canisterId={asset_canister_id}`.
+2. **Backend setup**:
+   ```bash
+   cd backend/
+   npm install
+   node server.js
+   ```
 
-Additionally, if you are making frontend changes, you can start a development server with
+3. **Frontend setup**:
+   ```bash
+   cd frontend/
+   npm install
+   npm start
+   ```
+   Access at: `http://localhost:3000` (or configured port).
 
-```bash
-npm start
-```
+4. **ICP canister deployment**:
+   ```bash
+   dfx start --background
+   dfx deploy
+   ```
+   Access the app canister at: `http://localhost:8000?canisterId={asset_canister_id}`
 
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 8000.
+## Usage
 
-### Note on frontend environment variables
+- **Registration & Login**: Users can create accounts and login using JWT authentication.
+- **Role-Based Dashboards**: Separate dashboards for Farmers, Distributors, and Retailers.
+- **Produce Management**: Add, view, and manage farm produce.
+- **ICP Integration**: Core data stored and managed via ICP canisters written in Motoko.
 
-If you are hosting frontend code somewhere without using DFX, you may need to make one of the following adjustments to ensure your project does not fetch the root key in production:
+## Contributing
 
-- set`NODE_ENV` to `production` if you are using Webpack
-- use your own preferred method to replace `process.env.NODE_ENV` in the autogenerated declarations
-- Write your own `createActor` constructor
+- Clone the repository and create a branch for your feature:
+  ```bash
+  git checkout -b feature/your-feature-name
+  ```
+- Make your changes and submit a pull request.
+
+## License
+
+Specify your project license here, e.g., MIT License.
