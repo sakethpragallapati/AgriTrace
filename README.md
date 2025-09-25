@@ -2,15 +2,15 @@
 
 ## Project Overview
 
-`agritech` is a decentralized agricultural technology platform built on the **Internet Computer (ICP)** blockchain. It integrates smart canisters with a full-stack web application to provide secure, transparent, and role-based solutions for the agricultural supply chain. The platform includes authentication, registration, and dedicated dashboards for farmers, distributors, and retailers, enabling streamlined farm produce management.
+`agritech` is a decentralized agricultural technology platform built on the **Internet Computer (ICP)** blockchain. It integrates smart canisters with a full-stack web application to provide secure, transparent, and role-based solutions for the agricultural supply chain. The platform includes OTP-based authentication using Twilio for SMS delivery, registration, and dedicated dashboards for farmers, distributors, and retailers, enabling streamlined farm produce management.
 
 ## Folder Structure
 
 ```
 agritech/
 ├─ backend/                  # Backend logic (Express + ICP integration)
-│  ├─ .env                   # Environment variables
-│  ├─ auth.js                # Authentication logic (JWT, middleware)
+│  ├─ .env                   # Environment variables (MongoDB, JWT, Twilio)
+│  ├─ auth.js                # OTP-based authentication logic (Twilio, JWT, middleware)
 │  ├─ canister-ids.js        # Canister configuration
 │  ├─ ic-agent.js            # ICP agent setup
 │  ├─ server.js              # Express server entry point
@@ -57,6 +57,7 @@ agritech/
   * Node.js + Express.js (REST API & business logic)
   * JWT (authentication & session handling)
   * MongoDB Atlas (cloud database for users, roles, and produce)
+  * Twilio (SMS-based OTP authentication)
 
 * **Blockchain / ICP**
 
@@ -77,11 +78,28 @@ cd agritech/
 
 ```bash
 cd backend/
-npm install
+npm install dotenv express cors mongoose jsonwebtoken twilio
+```
+
+Configure the `.env` file with the following:
+
+```plaintext
+MONGO_URI="mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+JWT_SECRET="your_jwt_secret_key"
+TWILIO_SID="your_twilio_account_sid"
+TWILIO_AUTH_TOKEN="your_twilio_auth_token"
+TWILIO_PHONE_NUMBER="your_twilio_phone_number"
+```
+
+Run the backend server:
+
+```bash
 node server.js
 ```
 
 Access backend at: [http://localhost:3000](http://localhost:3000)
+
+**Note**: Sign up for a Twilio account at [twilio.com](https://www.twilio.com) to obtain `TWILIO_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`. In trial mode, Twilio only sends SMS to verified phone numbers.
 
 ### 3. Frontend Setup
 
@@ -100,7 +118,7 @@ dfx start --background
 dfx deploy
 ```
 
-After deployment, you can get the `asset_canister_id` using:
+After deployment, get the `asset_canister_id` using:
 
 ```bash
 dfx canister id agritech_assets
@@ -111,8 +129,15 @@ Access the deployed canister app at:
 
 ## Features
 
-* **User Authentication** – Secure registration & login with JWT.
+* **User Authentication** – Secure OTP-based registration and login using Twilio for SMS delivery, authenticated with JWT.
 * **Role-Based Dashboards** – Farmers, Distributors, and Retailers each have dedicated dashboards.
 * **Produce Management** – Add, view, and manage agricultural produce.
 * **ICP Integration** – Decentralized data storage and smart contracts via Motoko canisters.
 * **Scalable Architecture** – Modular design with separation of frontend, backend, and blockchain layers.
+
+## Notes
+
+- **Twilio Configuration**: Ensure Twilio credentials are correctly set in the `.env` file. Adjust the country code in `auth.js` (e.g., `+91` for India) based on your target region.
+- **MongoDB**: Verify that your MongoDB Atlas connection string is correct and your IP is whitelisted.
+- **Security**: OTPs are stored in-memory for simplicity. In production, use Redis or a database for secure OTP storage.
+- **Rate Limiting**: Consider adding rate limiting to the OTP endpoints (e.g., using `express-rate-limit`) to prevent abuse.
