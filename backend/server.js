@@ -1,4 +1,3 @@
-// agritech/backend/server.js
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -6,7 +5,7 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { createActor } from "./ic-agent.js";
-import { register, login, logout, authMiddleware, getRoleByPhone, Farmer } from "./auth.js";
+import { register, sendOtp, verifyOtp, logout, authMiddleware, getRoleByPhone, Farmer } from "./auth.js";
 
 const app = express();
 
@@ -32,23 +31,21 @@ function stringifyBigInts(obj) {
 
 // ---------- AUTH ROUTES ----------
 app.post("/register", register);
-app.post("/login", login);
+app.post("/send-otp", sendOtp);
+app.post("/verify-otp", verifyOtp);
 app.post("/logout", logout);
 
 // ---------- FARMER ROUTES ----------
 app.post("/farmer/addProduce", authMiddleware, async (req, res) => {
-  // Only farmers can add produce
   if (req.user.role !== "farmer")
     return res.status(403).json({ error: "Access denied" });
 
   try {
     const { produceType, origin, quality, price } = req.body;
 
-    // Validate required fields
     if (!produceType || !origin || !quality || !price)
       return res.status(400).json({ error: "Missing fields" });
 
-    // Convert price to BigInt safely
     let priceBigInt;
     try {
       priceBigInt = BigInt(price);
@@ -56,25 +53,21 @@ app.post("/farmer/addProduce", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Invalid price" });
     }
 
-    // Call the canister to add produce
     const result = await canister.addProduce(
       produceType,
       origin,
       quality,
       priceBigInt,
-      req.user.phone  // Changed from username to phone
+      req.user.phone
     );
 
-    // Convert all BigInt fields to string before sending JSON
     const safeResult = stringifyBigInts(result);
-
     res.json(safeResult);
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: e.message });
   }
 });
-
 
 app.post("/farmer/transferProduce", authMiddleware, async (req, res) => {
   if (req.user.role !== "farmer")
@@ -83,16 +76,13 @@ app.post("/farmer/transferProduce", authMiddleware, async (req, res) => {
   try {
     const { id, newOwner, details, newPrice } = req.body;
 
-    // Validate required fields
     if (!id || !newOwner || !details || !newPrice)
       return res.status(400).json({ error: "Missing fields" });
 
-    // Validate newOwner role
     const newOwnerRole = await getRoleByPhone(newOwner);
     if (!newOwnerRole) return res.status(400).json({ error: "New owner not found" });
     if (newOwnerRole !== "distributor") return res.status(400).json({ error: "Can only transfer to distributor" });
 
-    // Convert to BigInt safely
     let idBigInt, newPriceBigInt;
     try {
       idBigInt = BigInt(id);
@@ -103,14 +93,13 @@ app.post("/farmer/transferProduce", authMiddleware, async (req, res) => {
 
     const result = await canister.transferProduce(
       idBigInt,
-      req.user.phone,  // Changed from username to phone
+      req.user.phone,
       newOwner,
       details,
       newPriceBigInt
     );
     const safeResult = stringifyBigInts(result);
 
-    // Check if transfer was successful and store the ID in farmer's transferredProduces
     if (result.ok) {
       const farmer = await Farmer.findOne({ phone: req.user.phone });
       if (farmer) {
@@ -131,7 +120,7 @@ app.get("/farmer/produces", authMiddleware, async (req, res) => {
     return res.status(403).json({ error: "Access denied" });
 
   try {
-    const result = await canister.getProducesByOwner(req.user.phone);  // Changed from username to phone
+    const result = await canister.getProducesByOwner(req.user.phone);
     const safeResult = stringifyBigInts(result);
     res.json(safeResult);
   } catch (err) {
@@ -154,7 +143,7 @@ app.get("/farmer/transferredProduces", authMiddleware, async (req, res) => {
     for (const idStr of transferredIds) {
       const idBigInt = BigInt(idStr);
       const trace = await canister.getProduceTrace(idBigInt);
-      if (trace) {  // Skip if null
+      if (trace) {
         const safeTrace = stringifyBigInts(trace);
         traces.push(safeTrace);
       }
@@ -175,16 +164,13 @@ app.post("/distributor/transferProduce", authMiddleware, async (req, res) => {
   try {
     const { id, newOwner, details, newPrice } = req.body;
 
-    // Validate required fields
     if (!id || !newOwner || !details || !newPrice)
       return res.status(400).json({ error: "Missing fields" });
 
-    // Validate newOwner role
     const newOwnerRole = await getRoleByPhone(newOwner);
     if (!newOwnerRole) return res.status(400).json({ error: "New owner not found" });
     if (newOwnerRole !== "retailer") return res.status(400).json({ error: "Can only transfer to retailer" });
 
-    // Convert to BigInt safely
     let idBigInt, newPriceBigInt;
     try {
       idBigInt = BigInt(id);
@@ -195,7 +181,7 @@ app.post("/distributor/transferProduce", authMiddleware, async (req, res) => {
 
     const result = await canister.transferProduce(
       idBigInt,
-      req.user.phone,  // Changed from username to phone
+      req.user.phone,
       newOwner,
       details,
       newPriceBigInt
@@ -213,7 +199,7 @@ app.get("/distributor/produces", authMiddleware, async (req, res) => {
     return res.status(403).json({ error: "Access denied" });
 
   try {
-    const result = await canister.getProducesByOwner(req.user.phone);  // Changed from username to phone
+    const result = await canister.getProducesByOwner(req.user.phone);
     const safeResult = stringifyBigInts(result);
     res.json(safeResult);
   } catch (err) {
@@ -228,7 +214,7 @@ app.get("/retailer/produces", authMiddleware, async (req, res) => {
     return res.status(403).json({ error: "Access denied" });
 
   try {
-    const result = await canister.getProducesByOwner(req.user.phone);  // Changed from username to phone
+    const result = await canister.getProducesByOwner(req.user.phone);
     const safeResult = stringifyBigInts(result);
     res.json(safeResult);
   } catch (err) {

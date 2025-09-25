@@ -1,29 +1,35 @@
-// agritech/backend/auth.js
 import dotenv from 'dotenv';
 dotenv.config();
 
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import twilio from "twilio";
 
 const SECRET = process.env.JWT_SECRET;
+const TWILIO_SID = process.env.TWILIO_SID;
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
+
+const client = twilio(TWILIO_SID, TWILIO_AUTH_TOKEN);
+const otpStore = new Map(); // In-memory OTP store (use Redis in production)
+
+function generateOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+}
 
 const farmerSchema = new mongoose.Schema({
   phone: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
   role: { type: String, required: true },
   transferredProduces: [{ type: String }]
 });
 
 const distributorSchema = new mongoose.Schema({
   phone: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
   role: { type: String, required: true }
 });
 
 const retailerSchema = new mongoose.Schema({
   phone: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
   role: { type: String, required: true }
 });
 
@@ -32,9 +38,7 @@ const Distributor = mongoose.model("Distributor", distributorSchema);
 const Retailer = mongoose.model("Retailer", retailerSchema);
 
 export async function register(req, res) {
-  const { phone, password, role } = req.body;
-  console.log("Received body:", req.body); // 👈 check what Postman sends
-  console.log("Role received:", role);
+  const { phone, role } = req.body;
   if (!["farmer", "distributor", "retailer"].includes(role)) {
     return res.status(400).json({ error: "Invalid role" });
   }
@@ -50,49 +54,74 @@ export async function register(req, res) {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    const hashed = bcrypt.hashSync(password, 8);
+    const otp = generateOtp();
+    otpStore.set(phone, { otp, role, expires: Date.now() + 5 * 60 * 1000 }); // OTP expires in 5 minutes
 
-    if (role === "farmer") {
-      const newFarmer = new Farmer({ phone, password: hashed, role, transferredProduces: [] });
-      await newFarmer.save();
-    } else if (role === "distributor") {
-      const newDistributor = new Distributor({ phone, password: hashed, role });
-      await newDistributor.save();
-    } else if (role === "retailer") {
-      const newRetailer = new Retailer({ phone, password: hashed, role });
-      await newRetailer.save();
-    }
+    await client.messages.create({
+      body: `Your OTP for registration is: ${otp}`,
+      from: TWILIO_PHONE_NUMBER,
+      to: `+91${phone}` // Assuming Indian phone numbers; adjust country code as needed
+    });
 
-    res.json({ message: "Registered successfully" });
+    res.json({ message: "OTP sent to phone" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Failed to send OTP. Please try again." });
   }
 }
 
-export async function login(req, res) {
-  const { phone, password } = req.body;
+export async function sendOtp(req, res) {
+  const { phone } = req.body;
+  if (!/^\d{10}$/.test(phone)) {
+    return res.status(400).json({ error: "Phone must be exactly 10 digits" });
+  }
 
   try {
-    let user = await Farmer.findOne({ phone });
-    let userRole = "farmer";
-
-    if (!user) {
-      user = await Distributor.findOne({ phone });
-      userRole = "distributor";
+    let userRole = await getRoleByPhone(phone);
+    if (!userRole) {
+      return res.status(400).json({ error: "User not found. Please register first." });
     }
 
-    if (!user) {
-      user = await Retailer.findOne({ phone });
-      userRole = "retailer";
+    const otp = generateOtp();
+    otpStore.set(phone, { otp, role: userRole, expires: Date.now() + 5 * 60 * 1000 });
+
+    await client.messages.create({
+      body: `Your OTP for login is: ${otp}`,
+      from: TWILIO_PHONE_NUMBER,
+      to: `+91${phone}` // Adjust country code as needed
+    });
+
+    res.json({ message: "OTP sent to phone" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to send OTP. Please try again." });
+  }
+}
+
+export async function verifyOtp(req, res) {
+  const { phone, otp } = req.body;
+
+  try {
+    const stored = otpStore.get(phone);
+    if (!stored || stored.otp !== otp || Date.now() > stored.expires) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
-    if (!user) return res.status(400).json({ error: "Invalid credentials" });
+    if (!await getRoleByPhone(phone)) {
+      if (stored.role === "farmer") {
+        const newFarmer = new Farmer({ phone, role: stored.role, transferredProduces: [] });
+        await newFarmer.save();
+      } else if (stored.role === "distributor") {
+        const newDistributor = new Distributor({ phone, role: stored.role });
+        await newDistributor.save();
+      } else if (stored.role === "retailer") {
+        const newRetailer = new Retailer({ phone, role: stored.role });
+        await newRetailer.save();
+      }
+    }
 
-    const valid = bcrypt.compareSync(password, user.password);
-    if (!valid) return res.status(400).json({ error: "Invalid credentials" });
-
-    const token = jwt.sign({ phone: user.phone, role: userRole }, SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ phone, role: stored.role }, SECRET, { expiresIn: "1h" });
+    otpStore.delete(phone); // Clear OTP after use
     res.json({ token });
   } catch (err) {
     console.error(err);
