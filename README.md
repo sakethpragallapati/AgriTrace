@@ -125,9 +125,13 @@ dfx canister id agritech_assets
 ```
 
 Access the deployed canister app at:
-`http://localhost:8000?canisterId=<asset_canister_id>`
+`http://localhost:8000?canisterId=<asset_canister_id>`![WhatsApp Image 2025-09-30 at 1 16 52 PM](https://github.com/user-attachments/assets/a7c99987-2b76-45ec-8038-375397fa478c)
+![WhatsApp Image 2025-09-30 at 1 07 00 PM](https://github.com/user-attachments/assets/1ffb5d0f-d136-48f6-![WhatsApp Image 2025-09-30 at 1 31 13 PM](https://github.com/user-attachments/assets/29b93341-85f3-49ec-9c01-a6385e9ed407)
+bbdf-f2ce9c34b737)
+
 
 ## Features
+![WhatsApp Image 2025-09-30 at 1 02 12 PM](https://github.com/user-attachments/assets/3ebacc10-c164-4fd0-8164-1c30206dcf9d)
 
 * **User Authentication** – Secure OTP-based registration and login using Twilio for SMS delivery, authenticated with JWT.
 * **Role-Based Dashboards** – Farmers, Distributors, and Retailers each have dedicated dashboards.
