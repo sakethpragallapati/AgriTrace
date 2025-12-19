@@ -125,14 +125,9 @@ dfx canister id agritech_assets
 ```
 
 Access the deployed canister app at:
-`http://localhost:8000?canisterId=<asset_canister_id>`![WhatsApp Image 2025-09-30 at 1 16 52 PM](https://github.com/user-attachments/assets/a7c99987-2b76-45ec-8038-375397fa478c)
-![WhatsApp Image 2025-09-30 at 1 07 00 PM](https://github.com/user-attachments/assets/1ffb5d0f-d136-48f6-![WhatsApp Image 2025-09-30 at 1 31 13 PM](https://github.com/user-attachments/assets/29b93341-85f3-49ec-9c01-a6385e9ed407)
-bbdf-f2ce9c34b737)
-
+`http://localhost:8000?canisterId=<asset_canister_id>`
 
 ## Features
-![WhatsApp Image 2025-09-30 at 1 02 12 PM](https://github.com/user-attachments/assets/3ebacc10-c164-4fd0-8164-1c30206dcf9d)
-
 * **User Authentication** – Secure OTP-based registration and login using Twilio for SMS delivery, authenticated with JWT.
 * **Role-Based Dashboards** – Farmers, Distributors, and Retailers each have dedicated dashboards.
 * **Produce Management** – Add, view, and manage agricultural produce.
@@ -145,3 +140,11 @@ bbdf-f2ce9c34b737)
 - **MongoDB**: Verify that your MongoDB Atlas connection string is correct and your IP is whitelisted.
 - **Security**: OTPs are stored in-memory for simplicity. In production, use Redis or a database for secure OTP storage.
 - **Rate Limiting**: Consider adding rate limiting to the OTP endpoints (e.g., using `express-rate-limit`) to prevent abuse.
+  
+![](https://github.com/user-attachments/assets/966039a9-7325-41e2-aac1-d1c5e26dee4e)
+![](https://github.com/user-attachments/assets/d928ba33-22fe-46ec-b497-38e5bd11995b)
+![](https://github.com/user-attachments/assets/2f0597ff-d66a-4664-8ceb-28642868438e)
+![](https://github.com/user-attachments/assets/24935d63-5c6d-4bc7-bd28-c69b064a90f4)
+
+
+
